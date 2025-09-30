@@ -1,0 +1,1 @@
+CREATE TYPE public.notification_type AS ENUM ('follow', 'like', 'comment');
