@@ -22,7 +22,7 @@ services:
       - 6369:6379 # Host 6369 → Container 6379
 
   backend:
-    image: ghcr.io/radifan9/radif-sosmed-wallet-backend:latest
+    image: ghcr.io/radifan9/social-media-backend:latest
     volumes:
       - ./prod.env:/app/.env # untuk pass env
     networks:
