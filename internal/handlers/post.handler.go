@@ -130,3 +130,29 @@ func (p *PostHandler) LikePost(ctx *gin.Context) {
 
 	utils.Success(ctx, http.StatusOK, like)
 }
+
+func (p *PostHandler) AddComment(ctx *gin.Context) {
+	// Get the userID from token
+	claims, _ := ctx.Get("claims")
+	user, ok := claims.(pkg.Claims)
+	if !ok {
+		utils.Error(ctx, http.StatusInternalServerError, "internal server error", errors.New("cannot cast into pkg.claims"))
+		return
+	}
+
+	// Bind request body
+	var body models.CreateComment
+	if err := ctx.ShouldBind(&body); err != nil {
+		utils.HandleError(ctx, http.StatusBadRequest, "invalid request body", err.Error())
+		return
+	}
+
+	// Add comment
+	comment, err := p.pr.AddComment(ctx, user.UserId, body.PostID, body.Comment)
+	if err != nil {
+		utils.Error(ctx, http.StatusInternalServerError, "failed to add comment", err)
+		return
+	}
+
+	utils.Success(ctx, http.StatusCreated, comment)
+}

@@ -167,7 +167,7 @@ func (u *UserRepository) FollowUser(ctx context.Context, whoFollow, targetFollow
 			($1, $2)
 	`
 
-	_, err := u.db.Exec(ctx, query, whoFollow, targetFollow)
+	_, err := u.db.Exec(ctx, query, targetFollow, whoFollow)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {

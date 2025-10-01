@@ -52,3 +52,15 @@ type LikeResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 	Message   string    `json:"message"`
 }
+
+type CreateComment struct {
+	PostID  string `json:"post_id" binding:"required"`
+	Comment string `json:"comment" binding:"required"`
+}
+
+type CommentResponse struct {
+	PostID    string    `json:"post_id"`
+	UserID    string    `json:"user_id"`
+	Comment   string    `json:"comment"`
+	CreatedAt time.Time `json:"created_at"`
+}

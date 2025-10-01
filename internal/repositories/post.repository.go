@@ -188,3 +188,24 @@ func (p *PostRepository) LikePost(ctx context.Context, userID, postID string) (m
 	likeResp.Message = "post liked successfully"
 	return likeResp, nil
 }
+
+func (p *PostRepository) AddComment(ctx context.Context, userID, postID, comment string) (models.CommentResponse, error) {
+	query := `
+		INSERT INTO post_comments (post_id, user_id, comment)
+		VALUES ($1, $2, $3)
+		RETURNING post_id, user_id, comment
+	`
+
+	var commentResp models.CommentResponse
+	err := p.db.QueryRow(ctx, query, postID, userID, comment).Scan(
+		&commentResp.PostID,
+		&commentResp.UserID,
+		&commentResp.Comment,
+	)
+
+	if err != nil {
+		return models.CommentResponse{}, err
+	}
+
+	return commentResp, nil
+}
