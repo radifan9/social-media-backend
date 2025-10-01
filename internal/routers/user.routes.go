@@ -22,4 +22,5 @@ func RegisterUserRoutes(v1 *gin.RouterGroup, db *pgxpool.Pool, rdb *redis.Client
 	user := v1.Group("/user")
 	user.Use(verifyTokenWithBlacklist)
 	user.PATCH("/", userHandler.EditProfile)
+	user.POST("/:targetID/follow", userHandler.FollowUser)
 }

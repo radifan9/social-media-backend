@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/radifan9/social-media-backend/internal/models"
 	"github.com/redis/go-redis/v9"
@@ -151,4 +152,31 @@ func (u *UserRepository) EditProfile(ctx context.Context, userID string, body mo
 	}
 
 	return profile, nil
+}
+
+var ErrAlreadyFollowed = errors.New("user already followed this account")
+
+func (u *UserRepository) FollowUser(ctx context.Context, whoFollow, targetFollow string) error {
+	log.Println("who follow ID", whoFollow)
+	log.Println("target follow ID", targetFollow)
+
+	query := `
+		insert into
+			user_followers (user_id, follower_id)
+		values
+			($1, $2)
+	`
+
+	_, err := u.db.Exec(ctx, query, whoFollow, targetFollow)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" { // unqiue_violation
+				return ErrAlreadyFollowed
+			}
+		}
+		return err
+	}
+
+	return nil
 }

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -83,17 +84,12 @@ func (u *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	log.Println("email: ", user.Email)
-	log.Println("password: ", user.Password)
-
 	// GetID from Database
 	infoUser, err := u.ur.GetIDFromEmail(ctx, user.Email)
 	if err != nil {
 		utils.HandleError(ctx, http.StatusBadRequest, "bad request", err.Error())
 		return
 	}
-
-	log.Println("id : ", infoUser.Id)
 
 	// Get password & role from where ID is match
 	userCred, err := u.ur.GetPasswordFromID(ctx, infoUser.Id)
@@ -104,8 +100,6 @@ func (u *UserHandler) Login(ctx *gin.Context) {
 		})
 		return
 	}
-
-	log.Println("hashedPassword : ", userCred.Password)
 
 	// Bandingkan password
 	hashCfg := pkg.NewHashConfig()
@@ -252,4 +246,29 @@ func (u *UserHandler) EditProfile(ctx *gin.Context) {
 	}
 
 	utils.Success(ctx, http.StatusOK, editedProfile)
+}
+
+func (u *UserHandler) FollowUser(ctx *gin.Context) {
+	// Get the userID from token
+	claims, _ := ctx.Get("claims")
+	user, ok := claims.(pkg.Claims)
+	if !ok {
+		utils.HandleError(ctx, http.StatusInternalServerError, "internal server error", "cannot cast into pkg.claims")
+		return
+	}
+
+	// Get follow target
+	targetID := ctx.Param("targetID")
+
+	if err := u.ur.FollowUser(ctx, user.UserId, targetID); err != nil {
+		switch {
+		case errors.Is(err, repositories.ErrAlreadyFollowed):
+			utils.Error(ctx, http.StatusConflict, "you already follow this user.", err)
+		default:
+			utils.Error(ctx, http.StatusInternalServerError, "internal server error", err)
+		}
+		return
+	}
+
+	utils.Success(ctx, http.StatusOK, nil)
 }
