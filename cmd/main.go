@@ -13,7 +13,7 @@ func main() {
 	log.Println("--- --- Social Media --- ---")
 
 	// Load environment variables
-	if err := godotenv.Load(".env"); err != nil {
+	if err := godotenv.Load(""); err != nil {
 		log.Println("failed to load environment variables\nCause: ", err.Error())
 		return
 	}
