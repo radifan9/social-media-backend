@@ -6,10 +6,10 @@ CREATE TABLE public.notifications (
 	recipient_id uuid NOT NULL,
 	actor_id uuid NOT NULL,
 	"type" public."notification_type" NOT NULL,
-	post_id uuid NULL,
-	comment_id uuid NULL,
-	read_at timestamptz NULL,
-	created_at timestamptz DEFAULT CURRENT_TIMESTAMP NULL,
+	post_id uuid,
+	comment_id uuid,
+	read_at timestamptz,
+	created_at timestamptz DEFAULT CURRENT_TIMESTAMP,
 	CONSTRAINT check_not_self_notify CHECK ((recipient_id <> actor_id)),
 	CONSTRAINT notifications_pkey PRIMARY KEY (id)
 );
