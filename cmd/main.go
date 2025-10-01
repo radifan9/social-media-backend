@@ -9,19 +9,11 @@ import (
 	"github.com/radifan9/social-media-backend/internal/routers"
 )
 
-// @title           Ticktiz Ticketing
-// @version         1.0
-// @description     RESTful API created using gin gonic
-// @BasePath        /api/v1
-//
-// @securityDefinitions.apikey BearerAuth
-// @in header
-// @name Authorization
 func main() {
 	log.Println("--- --- Social Media --- ---")
 
 	// Load environment variables
-	if err := godotenv.Load("dev.env"); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		log.Println("failed to load environment variables\nCause: ", err.Error())
 		return
 	}
