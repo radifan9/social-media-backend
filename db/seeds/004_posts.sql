@@ -1,0 +1,18 @@
+INSERT INTO public.posts (id,user_id,text_content,created_at) OVERRIDING SYSTEM VALUE VALUES
+	 ('11ba1f81-5ce2-4e8f-b7ea-19fca0ed1fd0'::uuid,'c81d8a97-17e6-4ba0-a3d3-b26f75b3fe4a'::uuid,'','2025-10-01 10:10:12.655694+07'),
+	 ('a0ece4d0-2e0b-4166-a624-c04a9e795c3f'::uuid,'c81d8a97-17e6-4ba0-a3d3-b26f75b3fe4a'::uuid,'','2025-10-01 10:10:41.114164+07'),
+	 ('439072b4-2055-4148-8f11-05508528c7f4'::uuid,'c81d8a97-17e6-4ba0-a3d3-b26f75b3fe4a'::uuid,'','2025-10-01 10:11:03.39968+07'),
+	 ('193a6395-771b-4954-9555-2cc7ab0f3082'::uuid,'c81d8a97-17e6-4ba0-a3d3-b26f75b3fe4a'::uuid,'','2025-10-01 10:11:30.579876+07'),
+	 ('8f75d5b0-6db4-43c8-b049-b3edd6894bfb'::uuid,'c81d8a97-17e6-4ba0-a3d3-b26f75b3fe4a'::uuid,'','2025-10-01 10:11:32.444784+07'),
+	 ('8b0bd60e-99c2-4ec4-9aff-8ffeae517581'::uuid,'c81d8a97-17e6-4ba0-a3d3-b26f75b3fe4a'::uuid,'Ganteng banget','2025-10-01 10:11:53.54014+07'),
+	 ('5803bf2f-1099-4383-a53b-6ddb280cb915'::uuid,'c81d8a97-17e6-4ba0-a3d3-b26f75b3fe4a'::uuid,'Ganteng banget','2025-10-01 10:12:24.543473+07'),
+	 ('08b5dd62-2b75-4148-932c-be1dcec71f3d'::uuid,'c81d8a97-17e6-4ba0-a3d3-b26f75b3fe4a'::uuid,'Ganteng banget','2025-10-01 10:12:28.013376+07'),
+	 ('10759f44-7472-4a16-81eb-562e895f346f'::uuid,'c81d8a97-17e6-4ba0-a3d3-b26f75b3fe4a'::uuid,'Ganteng banget','2025-10-01 10:14:00.772185+07'),
+	 ('2d4d847b-d951-41c6-bf83-395d5a9e3cc5'::uuid,'c81d8a97-17e6-4ba0-a3d3-b26f75b3fe4a'::uuid,'Ganteng banget','2025-10-01 10:21:42.410285+07'),
+	 ('706d47b8-9f0b-41eb-b265-a246de6001f2'::uuid,'68304ace-6eb8-4f56-b074-dc3ecb16d0ba'::uuid,'Ganteng banget','2025-10-01 10:54:45.705832+07'),
+	 ('8878f664-1562-478d-921e-77a7d39d54dd'::uuid,'68304ace-6eb8-4f56-b074-dc3ecb16d0ba'::uuid,'Post kedua','2025-10-01 10:54:52.806748+07'),
+	 ('e87aef30-78cc-408f-a4fb-643a374d19b0'::uuid,'ae8520fb-3f21-4713-a8db-ff31f5fe2150'::uuid,'Dari federus 3','2025-10-01 11:05:17.960551+07'),
+	 ('5e28a585-f56a-48b3-9824-143420d70bd3'::uuid,'ae8520fb-3f21-4713-a8db-ff31f5fe2150'::uuid,'Dari federus 3, post kedua','2025-10-01 11:05:34.148248+07'),
+	 ('66cb02c0-4556-4e1e-8cff-d276baa1bbc1'::uuid,'ae8520fb-3f21-4713-a8db-ff31f5fe2150'::uuid,'Dari federus 3, post kedua','2025-10-01 11:52:37.48267+07'),
+	 ('bc42c067-086a-4da2-9b57-656232df994e'::uuid,'ae8520fb-3f21-4713-a8db-ff31f5fe2150'::uuid,'Dari federus 3, post kedua','2025-10-01 12:00:53.084262+07'),
+	 ('73af47db-7ffa-404f-961f-55bc3e98130f'::uuid,'141311dd-2a96-4f35-8f7a-eb0880c69653'::uuid,'Dari federus 6, post kedua','2025-10-01 13:50:32.681695+07');
