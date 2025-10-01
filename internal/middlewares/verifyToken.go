@@ -50,15 +50,15 @@ func VerifyToken(ctx *gin.Context) {
 	var claims pkg.Claims
 	if err := claims.VerifyToken(token); err != nil {
 		if strings.Contains(err.Error(), jwt.ErrTokenInvalidIssuer.Error()) {
-			utils.HandleMiddlewareError(ctx, http.StatusUnauthorized, "silahkan login kembali", "Invalid JWT")
+			utils.AbortWithError(ctx, http.StatusUnauthorized, "invalid token issuer", err)
 			return
 		}
 		if strings.Contains(err.Error(), jwt.ErrTokenExpired.Error()) {
-			utils.HandleMiddlewareError(ctx, http.StatusUnauthorized, "silahkan login kembali", "Expired JWT")
+			utils.AbortWithError(ctx, http.StatusUnauthorized, "token expired, please login again", err)
 			return
 		}
-		// fmt.Println(jwt.ErrTokenExpired)
-		utils.HandleMiddlewareError(ctx, http.StatusInternalServerError, "Internal Server Error", "Internal Server Error")
+
+		utils.AbortWithError(ctx, http.StatusUnauthorized, "invalid token", err)
 		return
 	}
 
