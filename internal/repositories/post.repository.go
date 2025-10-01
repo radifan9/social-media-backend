@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -77,6 +78,7 @@ func (p *PostRepository) CreatePost(ctx context.Context, userID string, body mod
 func (p *PostRepository) GetFollowingFeed(ctx context.Context, userID string) ([]models.FeedPost, error) {
 	query := `
 		SELECT 
+			p.id,
 			p.user_id,
 			p.text_content,
 			p.created_at,
@@ -118,6 +120,7 @@ func (p *PostRepository) GetFollowingFeed(ctx context.Context, userID string) ([
 		var comments []models.FeedComment
 
 		if err := rows.Scan(
+			&post.PostID,
 			&post.UserID,
 			&post.TextContent,
 			&post.CreatedAt,
@@ -143,4 +146,45 @@ func (p *PostRepository) GetFollowingFeed(ctx context.Context, userID string) ([
 	}
 
 	return posts, nil
+}
+
+func (p *PostRepository) LikePost(ctx context.Context, userID, postID string) (models.LikeResponse, error) {
+	var exists bool
+	checkQuery := `SELECT EXISTS(SELECT 1 FROM posts WHERE id = $1)`
+	if err := p.db.QueryRow(ctx, checkQuery, postID).Scan(&exists); err != nil {
+		return models.LikeResponse{}, err
+	}
+
+	if !exists {
+		return models.LikeResponse{}, fmt.Errorf("post not found")
+	}
+
+	// Try to insert the like
+	query := `
+		INSERT INTO post_likes (post_id, user_id)
+		VALUES ($1, $2)
+		ON CONFLICT (post_id, user_id) DO NOTHING
+		RETURNING id, post_id, user_id, created_at
+	`
+
+	var likeResp models.LikeResponse
+	err := p.db.QueryRow(ctx, query, postID, userID).Scan(
+		&likeResp.PostID,
+		&likeResp.UserID,
+		&likeResp.CreatedAt,
+	)
+
+	if err != nil {
+		// If no rows returned, the like already exists
+		if err.Error() == "no rows in result set" {
+			likeResp.PostID = postID
+			likeResp.UserID = userID
+			likeResp.Message = "post already liked"
+			return likeResp, nil
+		}
+		return models.LikeResponse{}, err
+	}
+
+	likeResp.Message = "post liked successfully"
+	return likeResp, nil
 }

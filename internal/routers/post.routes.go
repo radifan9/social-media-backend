@@ -16,6 +16,7 @@ func RegisterPostRoutes(v1 *gin.RouterGroup, db *pgxpool.Pool, rdb *redis.Client
 
 	post := v1.Group("/post")
 	post.POST("/", verifyTokenWithBlacklist, postHandler.CreatePost)
+	post.POST("/like", verifyTokenWithBlacklist, postHandler.LikePost)
 
 	feed := v1.Group("/feed")
 	feed.GET("/", verifyTokenWithBlacklist, postHandler.GetFollowingFeed)

@@ -100,3 +100,33 @@ func (p *PostHandler) GetFollowingFeed(ctx *gin.Context) {
 
 	utils.Success(ctx, http.StatusOK, posts)
 }
+
+func (p *PostHandler) LikePost(ctx *gin.Context) {
+	// Get the userID from token
+	claims, _ := ctx.Get("claims")
+	user, ok := claims.(pkg.Claims)
+	if !ok {
+		utils.Error(ctx, http.StatusInternalServerError, "internal server error", errors.New("cannot cast into pkg.claims"))
+		return
+	}
+
+	// Bind request body
+	var body models.LikeRequest
+	if err := ctx.ShouldBind(&body); err != nil {
+		utils.HandleError(ctx, http.StatusBadRequest, "invalid request body", err.Error())
+		return
+	}
+
+	// Like the post
+	like, err := p.pr.LikePost(ctx, user.UserId, body.PostID)
+	if err != nil {
+		if err.Error() == "post not found" {
+			utils.HandleError(ctx, http.StatusNotFound, "post not found", err.Error())
+			return
+		}
+		utils.Error(ctx, http.StatusInternalServerError, "failed to like post", err)
+		return
+	}
+
+	utils.Success(ctx, http.StatusOK, like)
+}

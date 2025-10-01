@@ -26,6 +26,7 @@ type PostImage struct {
 }
 
 type FeedPost struct {
+	PostID      string        `json:"post_id"`
 	UserID      string        `json:"user_id"`
 	TextContent string        `json:"text_content"`
 	CreatedAt   time.Time     `json:"created_at"`
@@ -39,4 +40,15 @@ type FeedComment struct {
 	Name        string    `json:"name"`
 	CommentText string    `json:"comment_text"`
 	CreatedAt   time.Time `json:"created_at"`
+}
+
+type LikeRequest struct {
+	PostID string `json:"post_id" binding:"required"`
+}
+
+type LikeResponse struct {
+	PostID    string    `json:"post_id"`
+	UserID    string    `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+	Message   string    `json:"message"`
 }
