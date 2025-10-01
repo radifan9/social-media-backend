@@ -5,17 +5,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/radifan9/social-media-backend/docs"
 	"github.com/radifan9/social-media-backend/internal/models"
 	"github.com/radifan9/social-media-backend/internal/utils"
 	"github.com/redis/go-redis/v9"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func InitRouter(db *pgxpool.Pool, rdb *redis.Client) *gin.Engine {
 	router := gin.Default()
 
 	// Swagger
-	// docs.SwaggerInfo.BasePath = "/"
-	// router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	docs.SwaggerInfo.BasePath = "/"
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	// API Version 1
 	v1 := router.Group("/api/v1")
