@@ -1,0 +1,42 @@
+services:
+  pg-db:
+    image: postgres:18-alpine3.22
+    env_file:
+      - ./prod.env
+    networks:
+      - sosmed-net
+    ports:
+      - "5422:5432" # Host 5422 → Container 5432
+    volumes:
+      - pg-sosmed:/var/lib/postgresql/data
+
+  rdb:
+    image: redis:8.2-alpine
+    env_file:
+      - ./prod.env
+    volumes:
+      - redis-sosmed:/data
+    networks:
+      - sosmed-net
+    ports:
+      - 6369:6379 # Host 6369 → Container 6379
+
+  backend:
+    image: ghcr.io/radifan9/radif-sosmed-wallet-backend:latest
+    volumes:
+      - ./prod.env:/app/.env # untuk pass env
+    networks:
+      - sosmed-net
+    ports:
+      - "8080:8080"
+    depends_on:
+      - pg-db
+      - rdb
+
+
+networks:
+  sosmed-net:
+
+volumes:
+  pg-sosmed:
+  redis-sosmed:
