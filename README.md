@@ -57,11 +57,8 @@ Aplikasi ini menggunakan **arsitektur monolith** yang cocok untuk skala user saa
    - Simpan hasil query ke Redis untuk request berikutnya
 2. **Write Flow**: 
    - Write data ke PostgreSQL
-   - Invalidate atau update cache di Redis
-3. **Cache Key Examples**:
-   - Feed: `feed:user:{userID}`
-   - User Profile: `user:{userID}`
-   - Post: `post:{postID}`
+   - Invalidate cache di Redis
+
 
 ### Low-Level Design
 
@@ -89,14 +86,7 @@ Aplikasi ini menggunakan **arsitektur monolith** yang cocok untuk skala user saa
 - Images disimpan di file system
 - Served melalui `/api/v1/img/*`
 
-#### Endpoint Design:
-| Method | Endpoint                 | Cache Strategy    |
-|--------|--------------------------|-------------------|
-| GET    | `/feed`                  | Cache-aside (TTL) |
-| GET    | `/user/:id`              | Cache-aside       |
-| POST   | `/post`                  | Cache invalidate  |
-| POST   | `/post/like`             | Cache invalidate  |
-| POST   | `/post/comment`          | Cache invalidate  |
+
 
 ### Address Key Issues
 
@@ -104,26 +94,11 @@ Aplikasi ini menggunakan **arsitektur monolith** yang cocok untuk skala user saa
 - **Database Replication** (Future Enhancement): PostgreSQL dengan master-replica setup
   - Jika master down, automatic failover ke replica
   - Read replica untuk load balancing read operations
-- **Docker Health Checks**: Automatic container restart on failure
-- **Graceful Shutdown**: Proper connection cleanup saat shutdown
 
 #### Scalability
 - **Vertical Scaling**: Increase container resources (CPU, Memory)
 - **Horizontal Scaling** (Future): 
   - Multiple backend instances di belakang load balancer
-  - Redis Cluster untuk distributed caching
-  - PostgreSQL read replicas untuk read-heavy operations
-
-#### Performance
-- **Redis Caching**: Mengurangi database load untuk frequent reads
-- **Database Indexing**: Index pada foreign keys dan frequently queried columns
-- **Connection Pooling**: Efficient database connection management
-
-#### Security
-- **JWT Token Expiration**: Automatic token expiry
-- **Token Blacklist**: Logout invalidates tokens via Redis
-- **Input Validation**: Sanitize dan validate semua user inputs
-- **SQL Injection Prevention**: Menggunakan parameterized queries (pgx)
 
 ---
 
@@ -311,22 +286,3 @@ All services share a dedicated Docker network with persistent data volumes.
 
 ---
 
-## 📝 Version History
-
-### Version 1.0.0 (Current)
-
-* Initial release
-* User registration & authentication
-* Profile management
-* Posting (with images)
-* Feed & interactions
-* Redis caching implementation
-* JWT-based security
-
----
-
-## 👥 Contributors
-
-* Radif - [@radifan9](https://github.com/radifan9)
-
----
