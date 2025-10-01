@@ -80,7 +80,8 @@ func (u *UserHandler) Register(ctx *gin.Context) {
 func (u *UserHandler) Login(ctx *gin.Context) {
 	var user models.User
 	if err := ctx.ShouldBind(&user); err != nil {
-		utils.HandleError(ctx, http.StatusBadRequest, "bad request", err.Error())
+		utils.Error(ctx, http.StatusBadRequest, "bad request", err)
+		// utils.HandleError(ctx, http.StatusBadRequest, "bad request", err.Error())
 		return
 	}
 
