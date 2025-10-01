@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/radifan9/social-media-backend/internal/models"
@@ -11,14 +12,16 @@ import (
 )
 
 type PostRepository struct {
-	db  *pgxpool.Pool
-	rdb *redis.Client
+	db           *pgxpool.Pool
+	rdb          *redis.Client
+	cacheManager *CacheManager
 }
 
 func NewPostRepository(db *pgxpool.Pool, rdb *redis.Client) *PostRepository {
 	return &PostRepository{
-		db:  db,
-		rdb: rdb,
+		db:           db,
+		rdb:          rdb,
+		cacheManager: NewCacheManager(rdb),
 	}
 }
 
@@ -76,6 +79,16 @@ func (p *PostRepository) CreatePost(ctx context.Context, userID string, body mod
 }
 
 func (p *PostRepository) GetFollowingFeed(ctx context.Context, userID string) ([]models.FeedPost, error) {
+	// Create cache key for this user's feed
+	cacheKey := fmt.Sprintf("sosmed:feed:%s", userID)
+
+	// Try to get from cache first
+	var cachedPosts []models.FeedPost
+	if p.cacheManager.GetFromCache(ctx, cacheKey, &cachedPosts) {
+		log.Printf("Feed cache hit for user: %s", userID)
+		return cachedPosts, nil
+	}
+
 	query := `
 		SELECT 
 			p.id,
@@ -145,6 +158,10 @@ func (p *PostRepository) GetFollowingFeed(ctx context.Context, userID string) ([
 		return []models.FeedPost{}, err
 	}
 
+	// Cache the result for 5 minutes
+	p.cacheManager.SetCache(ctx, cacheKey, posts, 5*time.Minute)
+	log.Printf("Feed cached for user: %s", userID)
+
 	return posts, nil
 }
 
@@ -186,6 +203,14 @@ func (p *PostRepository) LikePost(ctx context.Context, userID, postID string) (m
 	}
 
 	likeResp.Message = "post liked successfully"
+
+	// Invalidate feed cache for users who follow the post author
+	var postAuthorID string
+	authorQuery := `SELECT user_id FROM posts WHERE id = $1`
+	if err := p.db.QueryRow(ctx, authorQuery, postID).Scan(&postAuthorID); err == nil {
+		p.InvalidateFollowersFeedCache(ctx, postAuthorID)
+	}
+
 	return likeResp, nil
 }
 
@@ -207,5 +232,49 @@ func (p *PostRepository) AddComment(ctx context.Context, userID, postID, comment
 		return models.CommentResponse{}, err
 	}
 
+	// Invalidate feed cache for users who follow the post author
+	var postAuthorID string
+	authorQuery := `SELECT user_id FROM posts WHERE id = $1`
+	if err := p.db.QueryRow(ctx, authorQuery, postID).Scan(&postAuthorID); err == nil {
+		p.InvalidateFollowersFeedCache(ctx, postAuthorID)
+	}
+
 	return commentResp, nil
+}
+
+func (p *PostRepository) InvalidateUserFeedCache(ctx context.Context, userID string) {
+	cacheKey := fmt.Sprintf("sosmed:feed:%s", userID)
+	if err := p.rdb.Del(ctx, cacheKey).Err(); err != nil {
+		log.Printf("Failed to invalidate feed cache for user %s: %v", userID, err)
+	} else {
+		log.Printf("Feed cache invalidated for user: %s", userID)
+	}
+}
+
+func (p *PostRepository) InvalidateFollowersFeedCache(ctx context.Context, userID string) {
+	// Get all followers of this user
+	query := `SELECT follower_id FROM user_followers WHERE user_id = $1`
+	rows, err := p.db.Query(ctx, query, userID)
+	if err != nil {
+		log.Printf("Failed to get followers for cache invalidation: %v", err)
+		return
+	}
+	defer rows.Close()
+
+	var followerIDs []string
+	for rows.Next() {
+		var followerID string
+		if err := rows.Scan(&followerID); err != nil {
+			log.Printf("Error scanning follower ID: %v", err)
+			continue
+		}
+		followerIDs = append(followerIDs, followerID)
+	}
+
+	// Invalidate cache for each follower
+	for _, followerID := range followerIDs {
+		p.InvalidateUserFeedCache(ctx, followerID)
+	}
+
+	log.Printf("Invalidated feed cache for %d followers of user %s", len(followerIDs), userID)
 }
