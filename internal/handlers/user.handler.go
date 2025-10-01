@@ -30,13 +30,6 @@ func NewUserHandler(ur *repositories.UserRepository, rdb *redis.Client) *UserHan
 	}
 }
 
-// @Summary Register a new user
-// @Tags    Auth
-// @Accept  json
-// @Produce json
-// @Param   body body models.RegisterUser true "User registration"
-// @Success 201 {object} models.User
-// @Router  /api/v1/auth/register [post]
 func (u *UserHandler) Register(ctx *gin.Context) {
 	var user models.RegisterUser
 	if err := ctx.ShouldBind(&user); err != nil {
@@ -46,12 +39,7 @@ func (u *UserHandler) Register(ctx *gin.Context) {
 		})
 		return
 	}
-	log.Println("email : ", user.Email)
-	log.Println("password : ", user.Password)
 
-	// Hash password
-	// "password": "ceganssangar123(DF&&"
-	// format : email + sangar123(DF&&
 	hashCfg := pkg.NewHashConfig()
 	hashCfg.UseRecommended()
 	hashedPassword, err := hashCfg.GenHash(user.Password)
@@ -81,7 +69,6 @@ func (u *UserHandler) Login(ctx *gin.Context) {
 	var user models.User
 	if err := ctx.ShouldBind(&user); err != nil {
 		utils.Error(ctx, http.StatusBadRequest, "bad request", err)
-		// utils.HandleError(ctx, http.StatusBadRequest, "bad request", err.Error())
 		return
 	}
 
