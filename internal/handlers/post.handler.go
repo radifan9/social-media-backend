@@ -82,3 +82,21 @@ func (p *PostHandler) CreatePost(ctx *gin.Context) {
 
 	utils.Success(ctx, http.StatusOK, post)
 }
+
+func (p *PostHandler) GetFollowingFeed(ctx *gin.Context) {
+	// Get the userID from token
+	claims, _ := ctx.Get("claims")
+	user, ok := claims.(pkg.Claims)
+	if !ok {
+		utils.Error(ctx, http.StatusInternalServerError, "internal server error", errors.New("cannot cast into pkg.claims"))
+		return
+	}
+
+	posts, err := p.pr.GetFollowingFeed(ctx, user.UserId)
+	if err != nil {
+		utils.Error(ctx, http.StatusInternalServerError, "internal server error", err)
+		return
+	}
+
+	utils.Success(ctx, http.StatusOK, posts)
+}
