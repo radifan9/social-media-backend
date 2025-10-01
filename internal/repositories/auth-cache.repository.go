@@ -1,4 +1,4 @@
-package utils
+package repositories
 
 import (
 	"context"
@@ -22,11 +22,11 @@ func NewAuthCacheManager(rdb *redis.Client) *AuthCacheManager {
 // BlacklistToken adds a token to the blacklist
 func (a *AuthCacheManager) BlacklistToken(ctx context.Context, tokenString string, ttl time.Duration) error {
 	// Use a consistent key format for blacklisted tokens
-	key := fmt.Sprintf("tickitz:blacklist:%s", tokenString)
+	key := fmt.Sprintf("sosmed:blacklist:%s", tokenString)
 	log.Println("tokenString : ", tokenString)
 
 	// Store the token in blacklist with the remaining TTL
-	// key : tickitz:blacklist:<tokenString>
+	// key : sosmed:blacklist:<tokenString>
 	// value : blacklisted
 	err := a.rdb.Set(ctx, key, "blacklisted", ttl).Err()
 	if err != nil {
@@ -40,7 +40,7 @@ func (a *AuthCacheManager) BlacklistToken(ctx context.Context, tokenString strin
 
 // IsTokenBlacklisted checks if a token is in the blacklist
 func (a *AuthCacheManager) IsTokenBlacklisted(ctx context.Context, tokenString string) bool {
-	key := fmt.Sprintf("tickitz:blacklist:%s", tokenString)
+	key := fmt.Sprintf("sosmed:blacklist:%s", tokenString)
 
 	// Check if the key exists
 	result := a.rdb.Exists(ctx, key)
@@ -59,7 +59,7 @@ func (a *AuthCacheManager) IsTokenBlacklisted(ctx context.Context, tokenString s
 
 // IsUserTokensBlacklisted checks if all tokens for a user should be considered invalid
 func (a *AuthCacheManager) IsUserTokensBlacklisted(ctx context.Context, userID string, tokenIssuedAt time.Time) bool {
-	key := fmt.Sprintf("tickitz:user_blacklist:%s", userID)
+	key := fmt.Sprintf("sosmed:user_blacklist:%s", userID)
 
 	result := a.rdb.Get(ctx, key)
 	if result.Err() != nil {

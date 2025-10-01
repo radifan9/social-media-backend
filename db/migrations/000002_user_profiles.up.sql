@@ -8,6 +8,7 @@ CREATE TABLE public.user_profiles (
 	avatar text,
 	bio text,
 	created_at timestamptz DEFAULT CURRENT_TIMESTAMP,
+	updated_at timestamptz DEFAULT CURRENT_TIMESTAMP,
 	CONSTRAINT user_profiles_pkey PRIMARY KEY (user_id)
 );
 

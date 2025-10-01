@@ -7,15 +7,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/radifan9/social-media-backend/internal/repositories"
 	"github.com/radifan9/social-media-backend/internal/utils"
 	"github.com/radifan9/social-media-backend/pkg"
 	"github.com/redis/go-redis/v9"
 )
 
-var globalAuthCache *utils.AuthCacheManager
+var globalAuthCache *repositories.AuthCacheManager
 
 func InitAuthCache(rdb *redis.Client) {
-	globalAuthCache = utils.NewAuthCacheManager(rdb)
+	globalAuthCache = repositories.NewAuthCacheManager(rdb)
 }
 
 // Verify Token without checking Redis Cache
@@ -75,9 +76,9 @@ func VerifyToken(ctx *gin.Context) {
 
 // VerifyTokenWithBlacklist creates a middleware that checks both JWT validity and blacklist
 func VerifyTokenWithBlacklist(rdb *redis.Client) gin.HandlerFunc {
-	var authCache *utils.AuthCacheManager
+	var authCache *repositories.AuthCacheManager
 	if rdb != nil {
-		authCache = utils.NewAuthCacheManager(rdb)
+		authCache = repositories.NewAuthCacheManager(rdb)
 		log.Println("VerifyTokenWithBlacklist: Auth cache initialized")
 	} else {
 		log.Println("VerifyTokenWithBlacklist: Warning - Redis client is nil")

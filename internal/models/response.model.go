@@ -1,5 +1,26 @@
 package models
 
+// Success
+// {
+//   "success": true,
+//   "status": 200,
+//   "data": { "id": 1, "name": "John" }
+// }
+
+// Error
+// {
+//   "success": false,
+//   "status": 400,
+//   "message": "Invalid email format"
+// }
+
+type Response struct {
+	Success bool   `json:"success"`
+	Status  int    `json:"status"`
+	Message string `json:"message,omitempty"`
+	Data    any    `json:"data,omitempty"`
+}
+
 type SuccessResponse struct {
 	Success bool `json:"success" example:"true"`
 	Status  int  `json:"status" example:"200"`
@@ -7,7 +28,6 @@ type SuccessResponse struct {
 }
 
 type SuccessLoginResponse struct {
-	Role  string `json:"role"`
 	Token string `json:"token"`
 }
 

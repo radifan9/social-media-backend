@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
@@ -79,4 +80,75 @@ func (u *UserRepository) createProfile(ctx context.Context, tx pgx.Tx, userID st
 	}
 
 	return id, nil
+}
+
+func (u *UserRepository) GetIDFromEmail(ctx context.Context, email string) (models.User, error) {
+	query := `SELECT id FROM users WHERE email = $1`
+
+	var user models.User
+
+	if err := u.db.QueryRow(ctx, query, email).Scan(&user.Id); err != nil {
+		return models.User{}, errors.New("failed to login")
+	}
+	return user, nil
+}
+
+func (u *UserRepository) GetPasswordFromID(ctx context.Context, id string) (models.User, error) {
+	query := `SELECT password FROM users WHERE id = $1`
+
+	var user models.User
+
+	if err := u.db.QueryRow(ctx, query, id).Scan(&user.Password); err != nil {
+		return models.User{}, errors.New("failed to login")
+	}
+	return user, nil
+}
+
+func (u *UserRepository) EditProfile(ctx context.Context, userID string, body models.EditUserProfile, avatarPath string) (models.UserProfile, error) {
+	sql := "UPDATE user_profiles SET "
+	values := []any{}
+
+	if body.Name != "" {
+		sql += fmt.Sprintf("%s=$%d, ", "name", len(values)+1)
+		values = append(values, body.Name)
+	}
+
+	if body.Bio != "" {
+		sql += fmt.Sprintf("%s=$%d, ", "bio", len(values)+1)
+		values = append(values, body.Bio)
+	}
+
+	if body.Avatar != nil {
+		sql += fmt.Sprintf("%s=$%d, ", "avatar", len(values)+1)
+		values = append(values, avatarPath)
+	}
+
+	// sql += fmt.Sprintf("updated_at=CURRENT_TIMESTAMP WHERE user_id=$%d RETURNING user_id, first_name, last_name, img, phone_number, points, created_at, updated_at", len(values)+1)
+	sql += fmt.Sprintf(`updated_at=CURRENT_TIMESTAMP 
+    WHERE user_id=$%d 
+    RETURNING 
+        user_id, 
+        COALESCE(name, ''), 
+        COALESCE(bio, ''), 
+        COALESCE(avatar, ''), 
+        created_at, 
+        updated_at`, len(values)+1)
+
+	values = append(values, userID)
+
+	log.Println("SQL : ", sql)
+
+	var profile models.UserProfile
+	if err := u.db.QueryRow(ctx, sql, values...).Scan(
+		&profile.UserID,
+		&profile.Name,
+		&profile.Bio,
+		&profile.Avatar,
+		&profile.CreatedAt,
+		&profile.UpdatedAt,
+	); err != nil {
+		return models.UserProfile{}, err
+	}
+
+	return profile, nil
 }

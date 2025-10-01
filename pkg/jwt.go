@@ -69,15 +69,15 @@ import (
 
 type Claims struct {
 	UserId string `json:"id"`
-	Role   string `json:"role"`
+	// Role   string `json:"role"`
 	jwt.RegisteredClaims
 }
 
-func NewJWTClaims(userid string, role string) *Claims {
+func NewJWTClaims(userid string) *Claims {
 	now := time.Now()
 	return &Claims{
 		UserId: userid,
-		Role:   role,
+		// Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(time.Minute * 60)),
